@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Clinic Management — Dashboard</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * { box-sizing: border-box; }
+    
+    :root{
+      --bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      --card:#ffffff;
+      --text:#1a202c;
+      --muted:#718096;
+      --border:#e2e8f0;
+      --accent:#4f46e5;
+      --accent-hover:#4338ca;
+      --success:#10b981;
+      --warning:#f59e0b;
+      --error:#ef4444;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    }
+    
+    [data-theme='dark']{
+      --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --card:#1e293b;
+      --text:#f1f5f9;
+      --muted:#94a3b8;
+      --border:#334155;
+      --accent:#6366f1;
+      --accent-hover:#818cf8;
+      --success:#34d399;
+      --warning:#fbbf24;
+      --error:#f87171;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -1px rgba(0,0,0,0.2);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -2px rgba(0,0,0,0.2);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.2);
+    }
+
+    body{
+      background: var(--bg);
+      color: var(--text);
+      transition: all 0.3s ease;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    .card:hover{
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+    
+    input, select, textarea{
+      color: var(--text);
+      background: var(--card);
+      border: 2px solid var(--border);
+      transition: all 0.2s ease;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+    }
+    
+    input:focus, select:focus, textarea:focus{
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      transform: scale(1.01);
+    }
+    
+    input::placeholder, textarea::placeholder {
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    button{
+      transition: all 0.2s ease;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button:active{
+      transform: scale(0.98);
+    }
+    
+    button:disabled{
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    section{
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+    
+    section.active{
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn{
+      from{
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to{
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeIn{
+      from{ opacity: 0; }
+      to{ opacity: 1; }
+    }
+    
+    @keyframes pulse{
+      0%, 100%{ opacity: 1; }
+      50%{ opacity: 0.5; }
+    }
+    
+    @keyframes spin{
+      to{ transform: rotate(360deg); }
+    }
+    
+    .nav-active{
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: #fff;
+      box-shadow: var(--shadow);
+      transform: translateX(5px);
+    }
+    
+    .nav-btn{
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .nav-btn::before{
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transition: transform 0.2s ease;
+    }
+    
+    .nav-btn:hover::before{
+      transform: scaleY(1);
+    }
+    
+    .table-head{
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(99, 102, 241, 0.05));
+      color: var(--text);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    [data-theme='dark'] .table-head{
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+    }
+    
+    tbody tr{
+      transition: all 0.2s ease;
+    }
+    
+    tbody tr:hover{
+      background: rgba(79, 70, 229, 0.05);
+      transform: scale(1.01);
+    }
+    
+    [data-theme='dark'] tbody tr:hover{
+      background: rgba(99, 102, 241, 0.1);
+    }
+    
+    .muted{ color: var(--muted); }
+    
+    /* Toast Notifications */
+    .toast-container{
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .toast{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: var(--shadow-xl);
+      min-width: 300px;
+      animation: slideInRight 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .toast.success{
+      border-left: 4px solid var(--success);
+    }
+    
+    .toast.error{
+      border-left: 4px solid var(--error);
+    }
+    
+    .toast.warning{
+      border-left: 4px solid var(--warning);
+    }
+    
+    .toast.info{
+      border-left: 4px solid var(--accent);
+    }
+    
+    @keyframes slideInRight{
+      from{
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to{
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    /* Loading Spinner */
+    .spinner{
+      border: 3px solid rgba(79, 70, 229, 0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    
+    /* Button Styles */
+    .btn-primary{
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      box-shadow: var(--shadow);
+    }
+    
+    .btn-primary:hover{
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+    
+    .btn-success{
+      background: linear-gradient(135deg, var(--success), #059669);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      box-shadow: var(--shadow);
+    }
+    
+    .btn-success:hover{
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+    
+    .btn-danger{
+      background: linear-gradient(135deg, var(--error), #dc2626);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+    
+    .btn-danger:hover{
+      opacity: 0.9;
+      transform: scale(1.05);
+    }
+    
+    .btn-secondary{
+      background: var(--card);
+      color: var(--text);
+      border: 2px solid var(--border);
+      padding: 10px 20px;
+    }
+    
+    .btn-secondary:hover{
+      background: var(--border);
+      border-color: var(--accent);
+    }
+    
+    /* Icon Buttons */
+    .icon-btn{
+      background: none;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--accent);
+      transition: all 0.2s ease;
+    }
+    
+    .icon-btn:hover{
+      background: rgba(79, 70, 229, 0.1);
+      transform: scale(1.1);
+    }
+    
+    .icon-btn.danger{
+      color: var(--error);
+    }
+    
+    .icon-btn.danger:hover{
+      background: rgba(239, 68, 68, 0.1);
+    }
+    
+    /* Sidebar */
+    aside{
+      background: var(--card);
+      box-shadow: var(--shadow-xl);
+      border-right: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+    }
+    
+    /* Status Badge */
+    .badge{
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .badge.success{
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+    
+    .badge.warning{
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+    
+    .badge.error{
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+    
+    /* Smooth Scroll */
+    html{
+      scroll-behavior: smooth;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar{
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track{
+      background: var(--card);
+    }
+    
+    ::-webkit-scrollbar-thumb{
+      background: var(--border);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover{
+      background: var(--accent);
+    }
+  </style>
+</head>
+<body data-theme="light" class="h-screen flex">
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="w-72 p-6 flex flex-col gap-6 card shadow-lg">
+    <div class="text-center">
+      <div class="text-4xl mb-2">🏥</div>
+      <div class="font-bold text-xl" style="color:var(--accent)">Clinic DBMS</div>
+      <div class="muted text-sm mt-1">Hospital Management Dashboard</div>
+    </div>
+
+    <nav class="flex-1 flex flex-col gap-2">
+      <button class="nav-btn py-3 px-4 rounded-lg text-left hover:bg-[var(--border)] flex items-center gap-3 transition-all" onclick="showSection('departments', this)">
+        <i class="fas fa-building w-5 text-center"></i>
+        <span>Departments</span>
+      </button>
+      <button class="nav-btn py-3 px-4 rounded-lg text-left hover:bg-[var(--border)] flex items-center gap-3 transition-all" onclick="showSection('patients', this)">
+        <i class="fas fa-user-injured w-5 text-center"></i>
+        <span>Patients</span>
+      </button>
+      <button class="nav-btn py-3 px-4 rounded-lg text-left hover:bg-[var(--border)] flex items-center gap-3 transition-all" onclick="showSection('doctors', this)">
+        <i class="fas fa-user-doctor w-5 text-center"></i>
+        <span>Doctors</span>
+      </button>
+      <button class="nav-btn py-3 px-4 rounded-lg text-left hover:bg-[var(--border)] flex items-center gap-3 transition-all" onclick="showSection('appointments', this)">
+        <i class="fas fa-calendar-check w-5 text-center"></i>
+        <span>Appointments</span>
+      </button>
+      <button class="nav-btn py-3 px-4 rounded-lg text-left hover:bg-[var(--border)] flex items-center gap-3 transition-all" onclick="showSection('medications', this)">
+        <i class="fas fa-pills w-5 text-center"></i>
+        <span>Medications</span>
+      </button>
+      <button class="nav-btn py-3 px-4 rounded-lg text-left hover:bg-[var(--border)] flex items-center gap-3 transition-all" onclick="showSection('billing', this)">
+        <i class="fas fa-receipt w-5 text-center"></i>
+        <span>Billing</span>
+      </button>
+    </nav>
+
+    <div class="flex gap-2">
+      <button id="themeToggle" class="flex-1 py-2.5 rounded-lg btn-primary flex items-center justify-center gap-2">
+        <i class="fas fa-moon"></i>
+        <span>Dark Mode</span>
+      </button>
+      <button onclick="reloadAll()" class="py-2.5 px-4 rounded-lg btn-secondary flex items-center justify-center gap-2">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+    </div>
+
+    <div class="text-xs muted text-center">Connected to: <span id="apiHost" class="font-medium">http://localhost:5000</span></div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 p-8 overflow-auto">
+    <header class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-semibold">Clinic Management Dashboard</h1>
+      <div class="flex gap-3 items-center">
+        <input id="globalSearch" type="search" placeholder="Search visible rows..." oninput="filterVisible()" class="p-2 rounded border border-[var(--border)] bg-[var(--card)]" />
+      </div>
+    </header>
+
+    <!-- SECTIONS -->
+    <!-- PATIENTS -->
+    <section id="patients" class="active">
+      <div class="mb-6 grid grid-cols-2 gap-6">
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Add Patient</h2>
+          <div class="flex flex-col gap-3">
+            <input id="p_name" placeholder="Full name" class="p-2 rounded border border-[var(--border)]" />
+            <div class="flex gap-3">
+              <input id="p_age" type="number" placeholder="Age" class="p-2 rounded border border-[var(--border)] w-32" />
+              <select id="p_gender" class="p-2 rounded border border-[var(--border)]">
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <input id="p_phone" type="tel" placeholder="Phone Number" class="p-2 rounded border border-[var(--border)]" />
+            <div class="flex gap-2">
+              <button onclick="addPatient()" class="btn-primary flex items-center gap-2">
+                <i class="fas fa-plus"></i>
+                <span>Add Patient</span>
+              </button>
+              <button onclick="updatePatient()" class="btn-success flex items-center gap-2" id="updatePatientBtn" style="display:none;">
+                <i class="fas fa-save"></i>
+                <span>Update</span>
+              </button>
+              <button onclick="clearPatientForm()" class="btn-secondary flex items-center gap-2">
+                <i class="fas fa-times"></i>
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Patients Overview</h2>
+          <div class="muted text-sm mb-2">Total: <span id="patientCount">0</span></div>
+          <div class="overflow-auto max-h-56">
+            <table class="w-full text-sm">
+              <thead class="table-head"><tr>
+                <th class="p-2 text-left">ID</th><th class="p-2 text-left">Name</th><th class="p-2">Age</th><th class="p-2">Gender</th><th class="p-2">Phone</th><th class="p-2">Actions</th>
+              </tr></thead>
+              <tbody id="patients_tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOCTORS -->
+    <section id="doctors" class="">
+      <div class="mb-6 grid grid-cols-2 gap-6">
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Add Doctor</h2>
+          <div class="flex flex-col gap-3">
+            <input id="d_name" placeholder="Doctor name" class="p-2 rounded border border-[var(--border)]" />
+            <select id="d_department" class="p-2 rounded border border-[var(--border)]">
+              <option value="">Select Department</option>
+            </select>
+            <input id="d_room_no" placeholder="Room Number (e.g., 101, A-205)" class="p-2 rounded border border-[var(--border)]" />
+            <input id="d_spec" placeholder="Specialization (optional)" class="p-2 rounded border border-[var(--border)]" />
+            <input id="d_contact" placeholder="Phone number" class="p-2 rounded border border-[var(--border)]" />
+            <div class="flex gap-2">
+              <button onclick="addDoctor()" class="btn-primary flex items-center gap-2">
+                <i class="fas fa-plus"></i>
+                <span>Add Doctor</span>
+              </button>
+              <button onclick="updateDoctor()" class="btn-success flex items-center gap-2" id="updateDoctorBtn" style="display:none;">
+                <i class="fas fa-save"></i>
+                <span>Update</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Doctors</h2>
+          <div class="muted text-sm mb-2">Total: <span id="doctorCount">0</span></div>
+          <div class="overflow-auto max-h-56">
+            <table class="w-full text-sm">
+              <thead class="table-head"><tr>
+                <th class="p-2 text-left">ID</th><th class="p-2 text-left">Name</th><th class="p-2">Department</th><th class="p-2">Room No</th><th class="p-2">Specialization</th><th class="p-2">Phone</th><th class="p-2">Actions</th>
+              </tr></thead>
+              <tbody id="doctors_tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPOINTMENTS -->
+    <section id="appointments" class="">
+      <div class="mb-6 grid grid-cols-2 gap-6">
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Schedule Appointment</h2>
+          <div class="flex flex-col gap-3">
+            <select id="a_patient" class="p-2 rounded border border-[var(--border)]">
+              <option value="">Select Patient</option>
+            </select>
+            <select id="a_department" class="p-2 rounded border border-[var(--border)]" onchange="filterDoctorsByDepartment()">
+              <option value="">Select Department First</option>
+            </select>
+            <select id="a_doctor" class="p-2 rounded border border-[var(--border)]" onchange="showDoctorRoom()" disabled>
+              <option value="">Select Doctor (choose department first)</option>
+            </select>
+            <div id="doctor_room_display" class="p-3 rounded-lg border-2 border-blue-500/30" style="display:none; background: rgba(59, 130, 246, 0.1);">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-door-open" style="color: var(--accent);"></i>
+                <span class="font-semibold">Doctor's Room: <span id="doctor_room_number" style="color: var(--accent); font-weight: 700;"></span></span>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <input id="a_date" type="date" class="p-2 rounded border border-[var(--border)]" />
+              <input id="a_time" type="time" class="p-2 rounded border border-[var(--border)]" />
+            </div>
+            <div class="flex gap-2">
+              <button onclick="addAppointment()" class="px-4 py-2 rounded bg-[var(--accent)] text-white">Schedule</button>
+              <button onclick="updateAppointment()" class="px-4 py-2 rounded bg-green-600 text-white" id="updateAppointmentBtn" style="display:none;">Update Appointment</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Upcoming Appointments</h2>
+          <div class="muted text-sm mb-2">Total: <span id="appointmentCount">0</span></div>
+          <div class="overflow-auto max-h-56">
+            <table class="w-full text-sm">
+              <thead class="table-head"><tr>
+                <th class="p-2">ID</th><th class="p-2 text-left">Patient</th><th class="p-2 text-left">Doctor</th><th class="p-2">Date</th><th class="p-2">Time</th><th class="p-2">Actions</th>
+              </tr></thead>
+              <tbody id="appointments_tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEDICATIONS -->
+    <section id="medications" class="">
+      <div class="mb-6 grid grid-cols-2 gap-6">
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Add Medication</h2>
+          <div class="flex flex-col gap-3">
+            <select id="med_patient" class="p-2 rounded border border-[var(--border)]">
+              <option value="">Select Patient</option>
+            </select>
+            <select id="med_doctor" class="p-2 rounded border border-[var(--border)]">
+              <option value="">Select Doctor</option>
+            </select>
+            <input id="med_name" placeholder="Medication Name" class="p-2 rounded border border-[var(--border)]" />
+            <input id="med_dosage" placeholder="Dosage (e.g., 5mg BID)" class="p-2 rounded border border-[var(--border)]" />
+            <div class="flex gap-2">
+              <button onclick="addMedication()" class="btn-primary flex items-center gap-2">
+                <i class="fas fa-plus"></i>
+                <span>Add Medication</span>
+              </button>
+              <button onclick="updateMedication()" class="btn-success flex items-center gap-2" id="updateMedicationBtn" style="display:none;">
+                <i class="fas fa-save"></i>
+                <span>Update</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Medications Prescribed</h2>
+          <div class="muted text-sm mb-2">Total: <span id="medicationCount">0</span></div>
+          <div class="overflow-auto max-h-96">
+            <table class="w-full text-sm">
+              <thead class="table-head"><tr>
+                <th class="p-2">ID</th><th class="p-2 text-left">Patient</th><th class="p-2 text-left">Doctor</th><th class="p-2 text-left">Medication</th><th class="p-2">Dosage</th><th class="p-2">Actions</th>
+              </tr></thead>
+              <tbody id="medications_tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  </section>
+
+    <!-- BILLING -->
+    <section id="billing" class="">
+      <div class="mb-6 grid grid-cols-2 gap-6">
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Create Bill</h2>
+          <div class="flex flex-col gap-3">
+            <select id="b_patient" class="p-2 rounded border border-[var(--border)]">
+              <option value="">Select Patient</option>
+            </select>
+            <input id="b_amount" type="number" step="0.01" placeholder="Amount (e.g., 500.00)" class="p-2 rounded border border-[var(--border)]" />
+            <input id="b_date" type="date" placeholder="Bill Date" class="p-2 rounded border border-[var(--border)]" />
+            <select id="b_method" class="p-2 rounded border border-[var(--border)]">
+              <option>Cash</option>
+              <option>Card</option>
+              <option>Insurance</option>
+            </select>
+            <div class="flex gap-2">
+              <button onclick="addBilling()" class="px-4 py-2 rounded bg-[var(--accent)] text-white">Add Bill</button>
+              <button onclick="updateBilling()" class="px-4 py-2 rounded bg-green-600 text-white" id="updateBillingBtn" style="display:none;">Update Bill</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Billing Records</h2>
+          <div class="muted text-sm mb-2">Total: <span id="billingCount">0</span></div>
+          <div class="overflow-auto max-h-56">
+            <table class="w-full text-sm">
+              <thead class="table-head"><tr>
+                <th class="p-2">Bill ID</th><th class="p-2 text-left">Patient</th><th class="p-2">Amount</th><th class="p-2">Date</th><th class="p-2">Method</th><th class="p-2">Actions</th>
+              </tr></thead>
+              <tbody id="billing_tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  </section>
+
+    <!-- DEPARTMENTS -->
+    <section id="departments" class="">
+      <div class="mb-6 grid grid-cols-2 gap-6">
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Add Department</h2>
+          <div class="flex flex-col gap-3">
+            <input id="dep_name" placeholder="Department name" class="p-2 rounded border border-[var(--border)]" />
+            <div class="flex gap-2">
+              <button onclick="addDepartment()" class="px-4 py-2 rounded bg-[var(--accent)] text-white">Add Department</button>
+              <button onclick="updateDepartment()" class="px-4 py-2 rounded bg-green-600 text-white" id="updateDepartmentBtn" style="display:none;">Update Department</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl card">
+          <h2 class="text-lg font-semibold mb-3">Departments</h2>
+          <div class="muted text-sm mb-2">Total: <span id="departmentCount">0</span></div>
+          <div class="overflow-auto max-h-56">
+            <table class="w-full text-sm">
+              <thead class="table-head"><tr>
+                <th class="p-2">ID</th><th class="p-2 text-left">Name</th><th class="p-2">Actions</th>
+              </tr></thead>
+              <tbody id="departments_tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  </section>
+
+  </main>
+
+<script>
+  // API host (update if different)
+  const API = (document.getElementById('apiHost').textContent = 'http://localhost:5000') || 'http://localhost:5000';
+  
+  // Toast Notification System
+  function showToast(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: '<i class="fas fa-check-circle"></i>',
+      error: '<i class="fas fa-exclamation-circle"></i>',
+      warning: '<i class="fas fa-exclamation-triangle"></i>',
+      info: '<i class="fas fa-info-circle"></i>'
+    };
+    
+    toast.innerHTML = `
+      <div style="font-size: 20px;">${icons[type] || icons.info}</div>
+      <div style="flex: 1;">${message}</div>
+      <button onclick="this.parentElement.remove()" style="background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px;">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'slideInRight 0.3s ease reverse';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+  
+  // Replace alert with toast
+  const originalAlert = window.alert;
+  window.alert = function(message) {
+    showToast(message, 'info');
+  };
+
+  // Theme toggle
+  const themeBtn = document.getElementById('themeToggle');
+  themeBtn.addEventListener('click', () => {
+    const body = document.body;
+    const dark = body.getAttribute('data-theme') === 'dark';
+    body.setAttribute('data-theme', dark ? 'light' : 'dark');
+    const icon = themeBtn.querySelector('i');
+    const span = themeBtn.querySelector('span');
+    if (dark) {
+      icon.className = 'fas fa-moon';
+      span.textContent = 'Dark Mode';
+      showToast('Switched to Light Mode', 'info', 2000);
+    } else {
+      icon.className = 'fas fa-sun';
+      span.textContent = 'Light Mode';
+      showToast('Switched to Dark Mode', 'info', 2000);
+    }
+  });
+
+  // Navigation
+  function showSection(id, btn){
+    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('nav-active'));
+    if (btn) btn.classList.add('nav-active');
+    // clear global search when switching
+    document.getElementById('globalSearch').value = '';
+    filterVisible();
+  }
+
+  // Quick refresh
+  function reloadAll(){
+    loadPatients(); loadDoctors(); loadDepartments(); loadAppointments(); loadMedications(); loadBilling();
+  }
+
+  // Filter visible rows by globalSearch
+  function filterVisible(){
+    const q = document.getElementById('globalSearch').value.toLowerCase();
+    document.querySelectorAll('tbody tr').forEach(tr=>{
+      tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+
+  // Filter doctors by selected department in appointments
+  function filterDoctorsByDepartment(){
+    const deptSelect = document.getElementById('a_department');
+    const doctorSelect = document.getElementById('a_doctor');
+    const roomDisplay = document.getElementById('doctor_room_display');
+    
+    if(!deptSelect || !doctorSelect || !window.allDoctors) return;
+    
+    const selectedDeptId = deptSelect.value;
+    
+    if(!selectedDeptId || selectedDeptId === ''){
+      // No department selected - disable doctor dropdown
+      doctorSelect.disabled = true;
+      doctorSelect.innerHTML = '<option value="">Select Doctor (choose department first)</option>';
+      if(roomDisplay) roomDisplay.style.display = 'none';
+      return;
+    }
+    
+    // Filter doctors by department
+    const filteredDoctors = window.allDoctors.filter(d => 
+      d.department_id == selectedDeptId || d.department_id === parseInt(selectedDeptId)
+    );
+    
+    if(filteredDoctors.length === 0){
+      doctorSelect.disabled = false;
+      doctorSelect.innerHTML = '<option value="">No doctors in this department</option>';
+    } else {
+      doctorSelect.disabled = false;
+      doctorSelect.innerHTML = '<option value="">Select Doctor</option>' + 
+        filteredDoctors.map(d => {
+          const roomInfo = d.room_no ? ` (Room: ${escapeHtml(d.room_no)})` : '';
+          return `<option value="${d.doctor_id}" data-room="${d.room_no || ''}" data-dept-id="${d.department_id || ''}">${d.doctor_id} • ${escapeHtml(d.name)}${roomInfo}</option>`;
+        }).join('');
+    }
+    
+    // Clear room display when department changes
+    if(roomDisplay) roomDisplay.style.display = 'none';
+  }
+
+  // Show doctor's room number when selected in appointments
+  function showDoctorRoom(){
+    const doctorSelect = document.getElementById('a_doctor');
+    const roomDisplay = document.getElementById('doctor_room_display');
+    const roomNumber = document.getElementById('doctor_room_number');
+    
+    if(!doctorSelect || !roomDisplay || !roomNumber) return;
+    
+    const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
+    const room = selectedOption ? selectedOption.getAttribute('data-room') : '';
+    
+    if(room && room.trim() !== ''){
+      roomNumber.textContent = room;
+      roomDisplay.style.display = 'block';
+    } else {
+      roomDisplay.style.display = 'none';
+    }
+  }
+
+  // ---------- PATIENTS ----------
+  async function loadPatients(){
+    try {
+      const res = await fetch(`${API}/patients`);
+      const data = await res.json();
+      const tbody = document.getElementById('patients_tbody');
+      tbody.innerHTML = data.map(p => `
+        <tr class="border-b">
+          <td class="p-2">${p.patient_id}</td>
+          <td class="p-2">${escapeHtml(p.name)}</td>
+          <td class="p-2 text-center">${p.age ?? ''}</td>
+          <td class="p-2 text-center">${escapeHtml(p.gender)}</td>
+          <td class="p-2 text-xs">${p.phone ? `<i class="fas fa-phone"></i> ${escapeHtml(p.phone)}` : '—'}</td>
+          <td class="p-2 text-center">
+            <button onclick="editPatient(${p.patient_id})" class="icon-btn mr-2" title="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="deletePatient(${p.patient_id})" class="icon-btn danger" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('patientCount').textContent = data.length;
+      // populate patient selects used in appointments, billing, and medications
+      const patSelects = [document.getElementById('a_patient'), document.getElementById('b_patient'), document.getElementById('med_patient')];
+      patSelects.forEach(sel=>{
+        if(!sel) return;
+        sel.innerHTML = data.map(p => `<option value="${p.patient_id}">${p.patient_id} • ${escapeHtml(p.name)}</option>`).join('');
+      });
+    } catch (err) {
+      console.error('Failed to load patients', err);
+    }
+  }
+
+  async function addPatient(){
+    const name = document.getElementById('p_name').value.trim();
+    const age = document.getElementById('p_age').value;
+    const gender = document.getElementById('p_gender').value;
+    const phone = document.getElementById('p_phone').value.trim();
+    if(!name) return showToast('Please enter patient name.', 'warning');
+    try {
+      await fetch(`${API}/add-patient`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name, age, gender, phone})
+      });
+      document.getElementById('p_name').value = ''; 
+      document.getElementById('p_age').value=''; 
+      document.getElementById('p_gender').value='';
+      document.getElementById('p_phone').value='';
+      await loadPatients();
+      showToast('Patient added successfully!', 'success');
+    } catch(e){ showToast('Error adding patient', 'error'); console.error(e) }
+  }
+
+  async function editPatient(id){
+    try {
+  const res = await fetch(`${API}/patients`);
+  const patients = await res.json();
+      const patient = patients.find(p => p.patient_id === id);
+      if(!patient) return showToast('Patient not found', 'error');
+      
+      // Pre-fill form
+      document.getElementById('p_name').value = patient.name || '';
+      document.getElementById('p_age').value = patient.age || '';
+      document.getElementById('p_gender').value = patient.gender || '';
+      document.getElementById('p_phone').value = patient.phone || '';
+      
+      // Store ID for update
+      document.getElementById('p_name').dataset.editId = id;
+      
+      // Show update button
+      document.getElementById('updatePatientBtn').style.display = 'inline-flex';
+      
+      // Scroll to form
+      document.getElementById('patients').scrollIntoView({behavior: 'smooth'});
+      showToast('Patient data loaded. Modify and click Update button.', 'info');
+    } catch(e){ showToast('Error loading patient', 'error'); console.error(e) }
+  }
+
+  async function updatePatient(){
+    const editId = document.getElementById('p_name').dataset.editId;
+    if(!editId) return showToast('No patient selected for update. Use Edit button first.', 'warning');
+    
+    const name = document.getElementById('p_name').value.trim();
+    const age = document.getElementById('p_age').value;
+    const gender = document.getElementById('p_gender').value;
+    const phone = document.getElementById('p_phone').value.trim();
+    if(!name) return showToast('Please enter patient name.', 'warning');
+    
+    try {
+      await fetch(`${API}/patients/${editId}`, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name, age, gender, phone})
+      });
+      delete document.getElementById('p_name').dataset.editId;
+      document.getElementById('updatePatientBtn').style.display = 'none';
+      clearPatientForm();
+      await loadPatients();
+      showToast('Patient updated successfully!', 'success');
+    } catch(e){ showToast('Error updating patient', 'error'); console.error(e) }
+  }
+
+  async function deletePatient(id){
+    if(!confirm('Delete patient #' + id + '?')) return;
+    try {
+      await fetch(`${API}/delete-patient/${id}`, { method:'DELETE' });
+      await loadPatients();
+      showToast('Patient deleted successfully', 'success');
+    } catch(e){ showToast('Delete failed', 'error'); console.error(e) }
+  }
+
+  function clearPatientForm(){
+    document.getElementById('p_name').value=''; document.getElementById('p_age').value='';
+    delete document.getElementById('p_name').dataset.editId;
+  }
+
+  // ---------- DOCTORS ----------
+  async function loadDoctors(){
+    try {
+  const res = await fetch(`${API}/doctors`);
+      const data = await res.json();
+      document.getElementById('doctors_tbody').innerHTML = data.map(d=>`
+        <tr class="border-b">
+          <td class="p-2">${d.doctor_id}</td>
+          <td class="p-2">${escapeHtml(d.name)}</td>
+          <td class="p-2">${escapeHtml(d.department ?? '—')}</td>
+          <td class="p-2">${escapeHtml(d.room_no ?? '—')}</td>
+          <td class="p-2">${escapeHtml(d.specialization ?? '—')}</td>
+          <td class="p-2">${escapeHtml(d.phone ?? d.contact ?? '—')}</td>
+          <td class="p-2 text-center">
+            <button onclick="editDoctor(${d.doctor_id})" class="icon-btn mr-2" title="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="deleteDoctor(${d.doctor_id})" class="icon-btn danger" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('doctorCount').textContent = data.length;
+      
+      // Populate department select in doctor form
+      const deptSel = document.getElementById('d_department');
+      if(deptSel) {
+        const deptRes = await fetch(`${API}/departments`).catch(()=>null);
+        if(deptRes) {
+          const depts = await deptRes.json();
+          deptSel.innerHTML = '<option value="">Select Department</option>' + 
+            depts.map(dept => `<option value="${dept.department_id}">${escapeHtml(dept.name)}</option>`).join('');
+        }
+      }
+      
+      // Store all doctors globally for filtering
+      window.allDoctors = data;
+      
+      // populate doctor select for medications (with room number)
+      const medDocSel = document.getElementById('med_doctor');
+      if(medDocSel) {
+        medDocSel.innerHTML = data.map(d => {
+          const roomInfo = d.room_no ? ` (Room: ${escapeHtml(d.room_no)})` : '';
+          return `<option value="${d.doctor_id}" data-room="${d.room_no || ''}">${d.doctor_id} • ${escapeHtml(d.name)}${roomInfo}</option>`;
+        }).join('');
+      }
+      
+      // Filter doctors for appointments (only if department is selected)
+      filterDoctorsByDepartment();
+    } catch(e){ console.error('loadDoctors', e) }
+  }
+  async function addDoctor(){
+    const name = document.getElementById('d_name').value.trim();
+    const department_id = document.getElementById('d_department').value;
+    const room_no = document.getElementById('d_room_no').value.trim();
+    const spec = document.getElementById('d_spec').value.trim();
+    const contact = document.getElementById('d_contact').value.trim();
+    if(!name) return showToast('Enter doctor name', 'warning');
+    try {
+      await fetch(`${API}/add-doctor`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name, department_id: department_id || null, room_no: room_no || null, specialization: spec || null, contact, phone: contact})
+      });
+      document.getElementById('d_name').value=''; 
+      document.getElementById('d_department').value='';
+      document.getElementById('d_room_no').value='';
+      document.getElementById('d_spec').value=''; 
+      document.getElementById('d_contact').value='';
+      await loadDoctors();
+      showToast('Doctor added successfully!', 'success');
+    } catch(e){ showToast('Error adding doctor', 'error'); console.error(e) }
+  }
+  async function editDoctor(id){
+    try {
+  const res = await fetch(`${API}/doctors`);
+  const doctors = await res.json();
+      const doctor = doctors.find(d => d.doctor_id === id);
+      if(!doctor) return showToast('Doctor not found', 'error');
+      
+      // Pre-fill form
+      document.getElementById('d_name').value = doctor.name || '';
+      document.getElementById('d_department').value = doctor.department_id || '';
+      document.getElementById('d_room_no').value = doctor.room_no || '';
+      document.getElementById('d_spec').value = doctor.specialization || '';
+      document.getElementById('d_contact').value = doctor.phone || doctor.contact || '';
+      
+      // Store ID for update
+      document.getElementById('d_name').dataset.editId = id;
+      document.getElementById('updateDoctorBtn').style.display = 'inline-flex';
+      
+      // Scroll to form
+      document.getElementById('doctors').scrollIntoView({behavior: 'smooth'});
+      showToast('Doctor data loaded. Modify and click Update button.', 'info');
+    } catch(e){ showToast('Error loading doctor', 'error'); console.error(e) }
+  }
+
+  async function updateDoctor(){
+    const editId = document.getElementById('d_name').dataset.editId;
+    if(!editId) return showToast('No doctor selected for update. Use Edit button first.', 'warning');
+    
+    const name = document.getElementById('d_name').value.trim();
+    const department_id = document.getElementById('d_department').value;
+    const room_no = document.getElementById('d_room_no').value.trim();
+    const spec = document.getElementById('d_spec').value.trim();
+    const contact = document.getElementById('d_contact').value.trim();
+    if(!name) return showToast('Enter doctor name', 'warning');
+    
+    try {
+      await fetch(`${API}/doctors/${editId}`, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name, department_id: department_id || null, room_no: room_no || null, specialization: spec || null, contact, phone: contact})
+      });
+      delete document.getElementById('d_name').dataset.editId;
+      document.getElementById('updateDoctorBtn').style.display = 'none';
+      document.getElementById('d_name').value=''; 
+      document.getElementById('d_department').value='';
+      document.getElementById('d_room_no').value='';
+      document.getElementById('d_spec').value=''; 
+      document.getElementById('d_contact').value='';
+      await loadDoctors();
+      showToast('Doctor updated successfully!', 'success');
+    } catch(e){ showToast('Error updating doctor', 'error'); console.error(e) }
+  }
+
+  async function deleteDoctor(id){
+    if(!confirm('Delete doctor #' + id + '?')) return;
+    try { 
+      await fetch(`${API}/delete-doctor/${id}`, {method:'DELETE'}); 
+      await loadDoctors(); 
+      showToast('Doctor deleted successfully', 'success');
+    } catch(e){ showToast('Delete failed', 'error') }
+  }
+
+  // ---------- DEPARTMENTS ----------
+  async function loadDepartments(){
+    try {
+      const res = await fetch(`${API}/departments`);
+      const data = await res.json();
+      document.getElementById('departments_tbody').innerHTML = data.map(d=>`
+        <tr class="border-b">
+          <td class="p-2">${d.department_id ?? d.id ?? ''}</td>
+          <td class="p-2">${escapeHtml(d.name)}</td>
+          <td class="p-2 text-center">
+            <button onclick="editDepartment(${d.department_id ?? d.id})" class="icon-btn mr-2" title="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="deleteDepartment(${d.department_id ?? d.id})" class="icon-btn danger" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('departmentCount').textContent = data.length;
+
+      // Populate department selects (doctor form and appointments)
+      const docDeptSel = document.getElementById('d_department');
+      const apptDeptSel = document.getElementById('a_department');
+      
+      if(docDeptSel) {
+        docDeptSel.innerHTML = '<option value="">Select Department</option>' + 
+          data.map(d => `<option value="${d.department_id ?? d.id}">${escapeHtml(d.name)}</option>`).join('');
+      }
+      
+      if(apptDeptSel) {
+        apptDeptSel.innerHTML = '<option value="">Select Department First</option>' + 
+          data.map(d => `<option value="${d.department_id ?? d.id}">${escapeHtml(d.name)}</option>`).join('');
+      }
+    } catch(e){ console.error('loadDepartments', e) }
+  }
+  async function addDepartment(){
+    const name = document.getElementById('dep_name').value.trim();
+    if(!name) return showToast('Enter department name', 'warning');
+    try {
+      await fetch(`${API}/add-department`, { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ name })});
+      document.getElementById('dep_name').value='';
+      await loadDepartments();
+      showToast('Department added successfully!', 'success');
+    } catch(e){ showToast('Error adding department', 'error'); console.error(e) }
+  }
+  async function editDepartment(id){
+    try {
+      const res = await fetch(`${API}/departments`);
+      const depts = await res.json();
+      const dept = depts.find(d => d.department_id === id);
+      if(!dept) return showToast('Department not found', 'error');
+      
+      // Pre-fill form
+      document.getElementById('dep_name').value = dept.name || '';
+      
+      // Store ID for update
+      document.getElementById('dep_name').dataset.editId = id;
+      document.getElementById('updateDepartmentBtn').style.display = 'inline-flex';
+      
+      // Scroll to form
+      document.getElementById('departments').scrollIntoView({behavior: 'smooth'});
+      showToast('Department data loaded. Modify and click Update button.', 'info');
+    } catch(e){ showToast('Error loading department', 'error'); console.error(e) }
+  }
+
+  async function updateDepartment(){
+    const editId = document.getElementById('dep_name').dataset.editId;
+    if(!editId) return showToast('No department selected for update. Use Edit button first.', 'warning');
+    
+    const name = document.getElementById('dep_name').value.trim();
+    if(!name) return showToast('Enter department name', 'warning');
+    
+    try {
+      await fetch(`${API}/departments/${editId}`, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name})
+      });
+      delete document.getElementById('dep_name').dataset.editId;
+      document.getElementById('updateDepartmentBtn').style.display = 'none';
+      document.getElementById('dep_name').value='';
+      await loadDepartments();
+      showToast('Department updated successfully!', 'success');
+    } catch(e){ showToast('Error updating department', 'error'); console.error(e) }
+  }
+
+  async function deleteDepartment(id){
+    if(!confirm('Delete department #' + id + '?')) return;
+    try { 
+      await fetch(`${API}/delete-department/${id}`, { method:'DELETE' }); 
+      await loadDepartments(); 
+      showToast('Department deleted successfully', 'success');
+    } catch(e){ showToast('Delete failed', 'error') }
+  }
+
+  // ---------- MEDICATIONS ----------
+  async function loadMedications(){
+    try {
+      const res = await fetch(`${API}/medications`);
+      const data = await res.json();
+      document.getElementById('medications_tbody').innerHTML = data.map(m=>`
+        <tr class="border-b">
+          <td class="p-2">${m.medication_id}</td>
+          <td class="p-2">${escapeHtml(m.patient ?? '')}</td>
+          <td class="p-2">${escapeHtml(m.doctor ?? '')}</td>
+          <td class="p-2">${escapeHtml(m.name)}</td>
+          <td class="p-2">${escapeHtml(m.dosage)}</td>
+          <td class="p-2 text-center">
+            <button onclick="editMedication(${m.medication_id})" class="icon-btn mr-2" title="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="deleteMedication(${m.medication_id})" class="icon-btn danger" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('medicationCount').textContent = data.length;
+    } catch(e){ console.error('loadMedications', e) }
+  }
+  
+  async function addMedication(){
+    const patient_id = document.getElementById('med_patient').value;
+    const doctor_id = document.getElementById('med_doctor').value;
+    const name = document.getElementById('med_name').value.trim();
+    const dosage = document.getElementById('med_dosage').value.trim();
+    if(!patient_id || !doctor_id || !name || !dosage) return showToast('Please fill all fields', 'warning');
+    try {
+      await fetch(`${API}/add-medication`, { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body: JSON.stringify({ patient_id, doctor_id, name, dosage })
+      });
+      document.getElementById('med_name').value=''; document.getElementById('med_dosage').value='';
+      await loadMedications();
+      showToast('Medication added successfully!', 'success');
+    } catch(e){ showToast('Error adding medication', 'error'); console.error(e) }
+  }
+  
+  async function editMedication(id){
+    try {
+      const res = await fetch(`${API}/medications`);
+      const medications = await res.json();
+      const med = medications.find(m => m.medication_id === id);
+      if(!med) return showToast('Medication not found', 'error');
+      
+      // Pre-fill form
+      document.getElementById('med_patient').value = med.patient_id || '';
+      document.getElementById('med_doctor').value = med.doctor_id || '';
+      document.getElementById('med_name').value = med.name || '';
+      document.getElementById('med_dosage').value = med.dosage || '';
+      
+      // Store ID for update
+      document.getElementById('med_name').dataset.editId = id;
+      document.getElementById('updateMedicationBtn').style.display = 'inline-flex';
+      
+      // Scroll to form
+      document.getElementById('medications').scrollIntoView({behavior: 'smooth'});
+      showToast('Medication data loaded. Modify and click Update button.', 'info');
+    } catch(e){ showToast('Error loading medication', 'error'); console.error(e) }
+  }
+  
+  async function updateMedication(){
+    const editId = document.getElementById('med_name').dataset.editId;
+    if(!editId) return showToast('No medication selected for update. Use Edit button first.', 'warning');
+    
+    const patient_id = document.getElementById('med_patient').value;
+    const doctor_id = document.getElementById('med_doctor').value;
+    const name = document.getElementById('med_name').value.trim();
+    const dosage = document.getElementById('med_dosage').value.trim();
+    if(!patient_id || !doctor_id || !name || !dosage) return showToast('Please fill all fields', 'warning');
+    
+    try {
+      await fetch(`${API}/medications/${editId}`, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({patient_id, doctor_id, name, dosage})
+      });
+      delete document.getElementById('med_name').dataset.editId;
+      document.getElementById('updateMedicationBtn').style.display = 'none';
+      document.getElementById('med_name').value=''; document.getElementById('med_dosage').value='';
+      await loadMedications();
+      showToast('Medication updated successfully!', 'success');
+    } catch(e){ showToast('Error updating medication', 'error'); console.error(e) }
+  }
+  
+  async function deleteMedication(id){
+    if(!confirm('Delete medication #' + id + '?')) return;
+    try { 
+      await fetch(`${API}/delete-medication/${id}`, { method:'DELETE' }); 
+      await loadMedications(); 
+      showToast('Medication deleted successfully', 'success');
+    } catch(e){ showToast('Delete failed', 'error') }
+  }
+
+  // ---------- APPOINTMENTS ----------
+  async function loadAppointments(){
+    try {
+  const res = await fetch(`${API}/appointments`);
+      const data = await res.json();
+      // We might only get ids for patient/doctor — map to names using current patient/doctor lists:
+      const patients = await (await fetch(`${API}/patients`)).json().catch(()=>[]);
+      const doctors = await (await fetch(`${API}/doctors`)).json().catch(()=>[]);
+      const pMap = Object.fromEntries(patients.map(p=>[p.patient_id, p.name]));
+      const dMap = Object.fromEntries(doctors.map(d=>[d.doctor_id, d.name]));
+
+      document.getElementById('appointments_tbody').innerHTML = data.map(a=>`
+        <tr class="border-b">
+          <td class="p-2">${a.appointment_id}</td>
+          <td class="p-2">${escapeHtml(pMap[a.patient_id] ?? a.patient_id ?? '')}</td>
+          <td class="p-2">${escapeHtml(dMap[a.doctor_id] ?? a.doctor_id ?? '')}</td>
+          <td class="p-2 text-center">${a.date ?? ''}</td>
+          <td class="p-2 text-center">${a.time ?? ''}</td>
+          <td class="p-2 text-center">
+            <button onclick="editAppointment(${a.appointment_id})" class="icon-btn mr-2" title="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="deleteAppointment(${a.appointment_id})" class="icon-btn danger" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('appointmentCount').textContent = data.length;
+    } catch(e){ console.error('loadAppointments', e) }
+  }
+  async function addAppointment(){
+    const patient_id = document.getElementById('a_patient').value;
+    const doctor_id = document.getElementById('a_doctor').value;
+    const date = document.getElementById('a_date').value;
+    const time = document.getElementById('a_time').value;
+    if(!patient_id || !doctor_id || !date) return showToast('Choose patient, doctor and date', 'warning');
+    try {
+      await fetch(`${API}/add-appointment`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ patient_id, doctor_id, date, time })});
+      document.getElementById('a_date').value=''; document.getElementById('a_time').value='';
+      document.getElementById('a_department').value='';
+      document.getElementById('a_doctor').value='';
+      document.getElementById('a_doctor').disabled = true;
+      document.getElementById('doctor_room_display').style.display = 'none';
+      await loadAppointments();
+      showToast('Appointment scheduled successfully!', 'success');
+    } catch(e){ showToast('Error scheduling appointment', 'error'); console.error(e) }
+  }
+  async function editAppointment(id){
+    try {
+      const res = await fetch(`${API}/appointments`);
+      const appointments = await res.json();
+      const appt = appointments.find(a => a.appointment_id === id);
+      if(!appt) return showToast('Appointment not found', 'error');
+      
+      // Get doctor info to find department
+      const doctors = await fetch(`${API}/doctors`).then(r=>r.json()).catch(()=>[]);
+      const selectedDoctor = doctors.find(d => d.doctor_id == appt.doctor_id);
+      
+      // Pre-fill form
+      document.getElementById('a_patient').value = appt.patient_id || '';
+      
+      // Set department first if doctor has one
+      if(selectedDoctor && selectedDoctor.department_id){
+        document.getElementById('a_department').value = selectedDoctor.department_id;
+        filterDoctorsByDepartment(); // This will populate doctors for that department
+        // Wait a moment for dropdown to update, then set doctor
+        setTimeout(() => {
+          document.getElementById('a_doctor').value = appt.doctor_id || '';
+          showDoctorRoom();
+        }, 100);
+      } else {
+        document.getElementById('a_department').value = '';
+        document.getElementById('a_doctor').value = appt.doctor_id || '';
+        showDoctorRoom();
+      }
+      
+      document.getElementById('a_date').value = appt.date || appt.appointment_date || '';
+      document.getElementById('a_time').value = appt.time || appt.appointment_time || '';
+      
+      // Store ID for update
+      document.getElementById('a_date').dataset.editId = id;
+      document.getElementById('updateAppointmentBtn').style.display = 'inline-flex';
+      
+      // Scroll to form
+      document.getElementById('appointments').scrollIntoView({behavior: 'smooth'});
+      showToast('Appointment data loaded. Modify and click Update button.', 'info');
+    } catch(e){ showToast('Error loading appointment', 'error'); console.error(e) }
+  }
+
+  async function updateAppointment(){
+    const editId = document.getElementById('a_date').dataset.editId;
+    if(!editId) return showToast('No appointment selected for update. Use Edit button first.', 'warning');
+    
+    const patient_id = document.getElementById('a_patient').value;
+    const doctor_id = document.getElementById('a_doctor').value;
+    const date = document.getElementById('a_date').value;
+    const time = document.getElementById('a_time').value;
+    if(!patient_id || !doctor_id || !date) return showToast('Choose patient, doctor and date', 'warning');
+    
+    try {
+      await fetch(`${API}/appointments/${editId}`, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({patient_id, doctor_id, date, appointment_date: date, appointment_time: time, time})
+      });
+      delete document.getElementById('a_date').dataset.editId;
+      document.getElementById('updateAppointmentBtn').style.display = 'none';
+      document.getElementById('a_date').value=''; document.getElementById('a_time').value='';
+      await loadAppointments();
+      showToast('Appointment updated successfully!', 'success');
+    } catch(e){ showToast('Error updating appointment', 'error'); console.error(e) }
+  }
+
+  async function deleteAppointment(id){
+    if(!confirm('Delete appointment #' + id + '?')) return;
+    try { 
+      await fetch(`${API}/delete-appointment/${id}`, { method:'DELETE' }); 
+      await loadAppointments(); 
+      showToast('Appointment deleted successfully', 'success');
+    } catch(e){ showToast('Delete failed', 'error') }
+  }
+
+  // ---------- BILLING ----------
+  async function loadBilling(){
+    try {
+      const res = await fetch(`${API}/billing`);
+      const data = await res.json();
+      const patients = await (await fetch(`${API}/patients`)).json().catch(()=>[]);
+      const pMap = Object.fromEntries(patients.map(p=>[p.patient_id, p.name]));
+      // Populate patient dropdown
+      const patSel = document.getElementById('b_patient');
+      if(patSel){
+        patSel.innerHTML = '<option value="">Select Patient</option>' + patients.map(p=>`<option value="${p.patient_id}">${p.patient_id} • ${escapeHtml(p.name)}</option>`).join('');
+      }
+      document.getElementById('billing_tbody').innerHTML = data.map(b=>`
+        <tr class="border-b">
+          <td class="p-2">${b.bill_id}</td>
+          <td class="p-2">${escapeHtml(pMap[b.pat_id] ?? b.patient ?? '')}</td>
+          <td class="p-2 text-right">$${parseFloat(b.amount || 0).toFixed(2)}</td>
+          <td class="p-2">${b.date_of_bill || '—'}</td>
+          <td class="p-2">${escapeHtml(b.payment_method || '—')}</td>
+          <td class="p-2 text-center">
+            <button onclick="editBilling(${b.bill_id})" class="icon-btn mr-2" title="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="deleteBilling(${b.bill_id})" class="icon-btn danger" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('billingCount').textContent = data.length;
+    } catch(e){ console.error('loadBilling', e) }
+  }
+  async function addBilling(){
+    const pat_id = document.getElementById('b_patient').value;
+    const amount = document.getElementById('b_amount').value;
+    const date_of_bill = document.getElementById('b_date').value;
+    const payment_method = document.getElementById('b_method').value;
+    if(!pat_id || !amount) return showToast('Select patient and enter amount', 'warning');
+    try {
+      await fetch(`${API}/add-billing`, { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body: JSON.stringify({ pat_id, amount, date_of_bill, payment_method })
+      });
+      document.getElementById('b_patient').value='';
+      document.getElementById('b_amount').value=''; 
+      document.getElementById('b_date').value='';
+      await loadBilling();
+      showToast('Bill created successfully!', 'success');
+    } catch(e){ showToast('Error adding bill', 'error'); console.error(e) }
+  }
+  async function editBilling(id){
+    try {
+      const res = await fetch(`${API}/billing`);
+      const bills = await res.json();
+      const bill = bills.find(b => b.bill_id === id);
+      if(!bill) return showToast('Bill not found', 'error');
+      
+      // Pre-fill form
+      document.getElementById('b_patient').value = bill.pat_id || '';
+      document.getElementById('b_amount').value = bill.amount || '';
+      document.getElementById('b_date').value = bill.date_of_bill || '';
+      document.getElementById('b_method').value = bill.payment_method || 'Cash';
+      
+      // Store ID for update
+      document.getElementById('b_amount').dataset.editId = id;
+      document.getElementById('updateBillingBtn').style.display = 'inline-flex';
+      
+      // Scroll to form
+      document.getElementById('billing').scrollIntoView({behavior: 'smooth'});
+      showToast('Bill data loaded. Modify and click Update button.', 'info');
+    } catch(e){ showToast('Error loading bill', 'error'); console.error(e) }
+  }
+
+  async function updateBilling(){
+    const editId = document.getElementById('b_amount').dataset.editId;
+    if(!editId) return showToast('No bill selected for update. Use Edit button first.', 'warning');
+    
+    const pat_id = document.getElementById('b_patient').value;
+    const amount = document.getElementById('b_amount').value;
+    const date_of_bill = document.getElementById('b_date').value;
+    const payment_method = document.getElementById('b_method').value;
+    if(!pat_id || !amount) return showToast('Select patient and enter amount', 'warning');
+    try {
+      await fetch(`${API}/billing/${editId}`, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ pat_id, amount, date_of_bill, payment_method })
+      });
+      delete document.getElementById('b_amount').dataset.editId;
+      document.getElementById('updateBillingBtn').style.display = 'none';
+      document.getElementById('b_patient').value='';
+      document.getElementById('b_amount').value=''; 
+      document.getElementById('b_date').value='';
+      await loadBilling();
+      showToast('Bill updated successfully!', 'success');
+    } catch(e){ showToast('Error updating bill', 'error'); console.error(e) }
+  }
+
+  async function deleteBilling(id){
+    if(!confirm('Delete bill #' + id + '?')) return;
+    try { 
+      await fetch(`${API}/delete-billing/${id}`, { method:'DELETE' }); 
+      await loadBilling(); 
+      showToast('Bill deleted successfully', 'success');
+    } catch(e){ showToast('Delete failed', 'error') }
+  }
+
+  // ---------- Utilities ----------
+  function escapeHtml(text){
+    if(text === null || text === undefined) return '';
+    return String(text)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+      .replaceAll('"','&quot;').replaceAll("'",'&#039;');
+  }
+
+  // Initial load
+  async function boot(){
+    // Load departments first (needed for doctor department dropdown)
+    await loadDepartments();
+    
+    // Then load patients and doctors
+    await Promise.all([
+      loadPatients(),
+      loadDoctors()
+    ]);
+    
+    // appointments, medications, billing depend on departments/patients/doctors maps,
+    // so load after initial data to ensure selects are populated (safe ordering)
+    await loadAppointments();
+    await loadMedications();
+    await loadBilling();
+  }
+  boot();
+
+  // Expose reloadInConsole for debugging
+  window.reloadAll = reloadAll;
+
+</script>
+</body>
+</html>
